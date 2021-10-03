@@ -46,6 +46,12 @@
 
 8. C 库函数 `char *getenv(const char *name)` 搜索 name 所指向的环境字符串，并返回相关的值给字符串。
 
+9. **pwd**：print work directory
+
+10. **帮助命令man**：用于打开帮助文档
+
+11. **$ 获取变量值**
+
 ## 习题 
 
 ## 实验
