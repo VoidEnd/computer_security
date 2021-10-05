@@ -52,6 +52,10 @@
 
 11. **$ 获取变量值**
 
+12. 一般情况下，**动态库加载的加载顺序**为LD_PRELOAD>LD_LIBRARY_PATH>/etc/ld.so.cache>/lib>/usr/lib。
+
+13. 提示:子进程可能不会继承LD_*环境变量
+
 ## 习题 
 
 ## 实验
