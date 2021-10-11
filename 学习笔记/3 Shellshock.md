@@ -36,11 +36,11 @@
 
 定义环境变量foo，值为看上去是函数定义的字符串，并且函数结尾的大括号外添加一个额外的打印命令。通过export标记该shell变量，并将他传至子进程，分别在子进程启动正常的bash和有漏洞的bash_shellshock，发现有漏洞的版本会正常启动且执行了额外命令，而正常版本无法启动。
 
-![image-20211010120038838](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211010120038838.png)
+![image-20211011130727929](D:\git_repository\computer_security\学习笔记\3 Shellshock.assets\image-20211011130727929.png)
 
 **[question]**为什么定义完变量后，再export，想要传递给子进程函数，在运行bash时和运行bash_shellshock不一样呢？换言之shellshock被修复后是怎么样的？而且知识点6里运行后，函数也未定义啊？
 
-![image-20211010121734355](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211010121734355.png)
+![image-20211011130735541](D:\git_repository\computer_security\学习笔记\3 Shellshock.assets\image-20211011130735541.png)
 
 ### Task 2: Setting up CGI programs
 

@@ -189,17 +189,17 @@ more指令是可以调用vi的，如果more具有set-uid权限，那么调用vi�
 
 - 使用printenv或env查看所有环境变量，使用`printenv variables`或`env | grep variables`查看具体环境变量；
 
-  ![image-20211003152231348](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211003152231348.png)
+  ![image-20211011130347882](D:\git_repository\computer_security\学习笔记\1 Set-UID Programs.assets\image-20211011130347882.png)
 
   env查看具体环境变量时会同时显示当前变量值和旧环境变量值。
 
 - 使用export设置环境变量，使用unset取消设置环境变量。需要注意的是，这两个命令并不是独立的程序；它们是 Bash 的两个内部命令（您将无法在 Bash 之外找到它们）。
 
-  ![image-20211003152530704](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211003152530704.png)
+  ![image-20211011130358136](D:\git_repository\computer_security\学习笔记\1 Set-UID Programs.assets\image-20211011130358136.png)
 
   观察发现，unset会取消当前的环境变量，所以在printenv中没有显示，而在env中只有旧环境变量值的显示。
 
-  ![image-20211003152810901](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211003152810901.png)
+  ![image-20211011130405967](D:\git_repository\computer_security\学习笔记\1 Set-UID Programs.assets\image-20211011130405967.png)
 
   观察发现，PWD和OLDPWD是两个不同的环境变量。
 
@@ -213,13 +213,13 @@ more指令是可以调用vi的，如果more具有set-uid权限，那么调用vi�
 
    - 子进程是父进程的副本，它将获得父进程的环境变量、数据空间、堆、栈等资源的副本。但是，子进程持有的是上述存储空间的“副本”，这意味着父子进程间不共享这些存储空间，它们之间共享的存储空间只有代码段。
 
-     ![image-20211003154900130](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211003154900130.png)
+     ![image-20211011130418994](D:\git_repository\computer_security\学习笔记\1 Set-UID Programs.assets\image-20211011130418994.png)
 
 2. <u>子进程不继承父进程进程号，他们的进程号不同；他们有不同的父进程号；子进程有自己的文件描述符和目录流的拷贝，子进程不继承父进程的进程，正文(text)， 数据和其它锁定内存等。</u>
 
 3. 没有对比出区别，说明环境变量一致，子进程继承了父进程的所有的环境变量。
 
-   ![image-20211003155325661](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211003155325661.png)
+   ![image-20211011130427109](D:\git_repository\computer_security\学习笔记\1 Set-UID Programs.assets\image-20211011130427109.png)
 
 ### Task 3
 
@@ -229,17 +229,17 @@ more指令是可以调用vi的，如果more具有set-uid权限，那么调用vi�
 
 1. 传递给执行文件的新环境变量数组为NULL，所以没有新的环境变量。
 
-   ![image-20211003161112216](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211003161112216.png)
+   ![image-20211011130434335](D:\git_repository\computer_security\学习笔记\1 Set-UID Programs.assets\image-20211011130434335.png)
 
 2. 传递了环境变量过去，所以有结果显示。
 
-   ![image-20211003161219389](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211003161219389.png)
+   ![image-20211011130446179](D:\git_repository\computer_security\学习笔记\1 Set-UID Programs.assets\image-20211011130446179.png)
 
 3. execve()用来执行参数filename字符串所代表的文件路径，第二个参数是利用数组指针来传递给执行文件，并且需要以空指针(NULL)结束，最后一个参数则为传递给执行文件的新环境变量数组。
 
    新程序通过第三个参数获得环境变量数组。且调用execve（）之后，会转到新的进程，自己会被“杀死”，也就是execve（）函数之后代码都不会被执行。
 
-   ![image-20211003161332382](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211003161332382.png)
+   ![image-20211011130453108](D:\git_repository\computer_security\学习笔记\1 Set-UID Programs.assets\image-20211011130453108.png)
 
 ### Task 4
 
@@ -251,7 +251,7 @@ more指令是可以调用vi的，如果more具有set-uid权限，那么调用vi�
 
 但通过`man system`可以看到system()函数的具体执行过程。实际上system（）函数执行了三步操作：fork一个子进程；在子进程中调用exec函数去执行command； 在父进程中调用wait去等待子进程结束。
 
-![image-20211003163433787](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211003163433787.png)
+![image-20211011130503437](D:\git_repository\computer_security\学习笔记\1 Set-UID Programs.assets\image-20211011130503437.png)
 
 ### Task 5
 
@@ -261,15 +261,15 @@ more指令是可以调用vi的，如果more具有set-uid权限，那么调用vi�
 
 2. 修改了可执行文件t5.out的所属权为root，并设置为set-UID程序
 
-   ![image-20211003164700617](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211003164700617.png)
+   ![image-20211011130511618](D:\git_repository\computer_security\学习笔记\1 Set-UID Programs.assets\image-20211011130511618.png)
 
 3. 首先设置变量
 
-   ![image-20211003165353599](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211003165353599.png)
+   ![image-20211011130521337](D:\git_repository\computer_security\学习笔记\1 Set-UID Programs.assets\image-20211011130521337.png)
 
    然后运行步骤2的set-UID程序
 
-   ![image-20211003165612633](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211003165612633.png)
+   ![image-20211011130531668](D:\git_repository\computer_security\学习笔记\1 Set-UID Programs.assets\image-20211011130531668.png)
 
    **[question]**很奇怪的是，环境变量LD_LIBRARY_PATH存在于父进程中，但在子进程中找不到。同时发现修改这个变量之前，即使是在父进程中，在环境变量列表中也没有这个变量。
 
@@ -283,17 +283,17 @@ more指令是可以调用vi的，如果more具有set-uid权限，那么调用vi�
 
 将t6.out的权限修改为root后，直接执行发现执行的命令并不是`ls`，而是`/bin/ls`
 
-![image-20211003172936138](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211003172936138.png)
+![image-20211011130540812](D:\git_repository\computer_security\学习笔记\1 Set-UID Programs.assets\image-20211011130540812.png)
 
 查看SHELL的环境变量值，发现为/bin/bash。
 
-![image-20211003173118856](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211003173118856.png)
+![image-20211011130547973](D:\git_repository\computer_security\学习笔记\1 Set-UID Programs.assets\image-20211011130547973.png)
 
 由于system（）函数是调用了shell环境变量。于是尝试将自己的可执行文件夹所在的目录加在了SHELL环境变量的开头：从而使这个Set-UID程序运行我的代码而不是`/bin/ls`，但是发现只修改环境变量并不可行，因此采用了书上的方法，将SHELL链接到了没有防护的zsh上，成功执行了我的指令。
 
 **[question]**bash和dash是不同的，环境变量中的SHELL的值为bash，而据书中所说默认链接的SHELL是dash，有些疑惑，环境变量中的值到底是什么意义呢
 
-![image-20211003175110389](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211003175110389.png)
+![image-20211011130556837](D:\git_repository\computer_security\学习笔记\1 Set-UID Programs.assets\image-20211011130556837.png)
 
 
 
@@ -310,15 +310,15 @@ more指令是可以调用vi的，如果more具有set-uid权限，那么调用vi�
 
 1. 过程与书上类似
 
-   ![image-20211005154729361](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211005154729361.png)
+   ![image-20211011130604165](D:\git_repository\computer_security\学习笔记\1 Set-UID Programs.assets\image-20211011130604165.png)
 
 2. 当是set-UID程序，且使用root用户运行时，系统会忽略LD_PRELOAD环境变量，所以调用的sleep()是系统的函数，在其他情况则调用的是自行定义的共享库中的函数。
 
-   ![image-20211005155705232](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211005155705232.png)
+   ![image-20211011130612783](D:\git_repository\computer_security\学习笔记\1 Set-UID Programs.assets\image-20211011130612783.png)
 
    但换成普通用户的set-UID程序运行时，则会调用我们定义的函数。
 
-   ![image-20211005155635396](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211005155635396.png)
+   ![image-20211011130620795](D:\git_repository\computer_security\学习笔记\1 Set-UID Programs.assets\image-20211011130620795.png)
 
    但换成第三个用户依旧不行
 
@@ -386,17 +386,17 @@ more指令是可以调用vi的，如果more具有set-uid权限，那么调用vi�
 
 1. 尝试删除，成功
 
-   ![image-20211005162302510](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211005162302510.png)
+   ![image-20211011130638754](D:\git_repository\computer_security\学习笔记\1 Set-UID Programs.assets\image-20211011130638754.png)
 
    **[question]**为什么v[0]是`/bin/cat`时运行`./t8.out ./test.c`时显示权限不够，必须要加上sudo才可以成功运行呢？
 
 2. 切换之后，攻击无效了
 
-   ![image-20211005164229212](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211005164229212.png)
+   ![image-20211011130647145](D:\git_repository\computer_security\学习笔记\1 Set-UID Programs.assets\image-20211011130647145.png)
 
    **[question]** 测试发现，同样的`./t8.out ./test.c`当system()运行时没有权限，但exec时就可以
 
-   ![image-20211005165023545](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211005165023545.png)
+   ![image-20211011130654335](D:\git_repository\computer_security\学习笔记\1 Set-UID Programs.assets\image-20211011130654335.png)
 
    
 
@@ -409,9 +409,9 @@ more指令是可以调用vi的，如果more具有set-uid权限，那么调用vi�
 
 设置为set-UID程序并用root用户运行时，成功修改文件，但是不授权时显示无法打开文件。
 
-![image-20211005170113778](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211005170113778.png)
+![image-20211011130701392](D:\git_repository\computer_security\学习笔记\1 Set-UID Programs.assets\image-20211011130701392.png)
 
-![image-20211005170646963](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211005170646963.png)
+![image-20211011130708697](D:\git_repository\computer_security\学习笔记\1 Set-UID Programs.assets\image-20211011130708697.png)
 
 成功读取文件后，通过`setuid(getuid());`放弃root权限，但由于文件没有关闭导致权限泄露，所以可以以普通用户的身份修改文件。
 

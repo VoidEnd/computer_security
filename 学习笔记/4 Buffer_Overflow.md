@@ -111,13 +111,13 @@
 >
 > ​		我们使用的shellcode只是上述程序的汇编版本。下面的程序演示如何通过执行存储在缓冲区中的shellcode来启动shell。请编译并运行以下代码，并查看是否调用了shell。你可以从网站上下载这个程序。如果您有兴趣编写自己的外壳代码，我们有一个单独的SEED lab。
 
-![image-20211010134155223](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211010134155223.png)
+![image-20211011130750485](D:\git_repository\computer_security\学习笔记\4 Buffer_Overflow.assets\image-20211011130750485.png)
 
 关闭了不可执行栈，成功调用了shell。
 
 ### The Vulnerable Program
 
-![image-20211010135213367](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211010135213367.png)
+![image-20211011130756407](D:\git_repository\computer_security\学习笔记\4 Buffer_Overflow.assets\image-20211011130756407.png)
 
 ### Task 2: Exploiting the Vulnerability
 
@@ -127,15 +127,38 @@
 
 使用python生成shellcode，填充代码为：
 
-![image-20211010171742895](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211010171742895.png)
+```python
+#########################################################################
+
+ret  = 0xbfffeb38 + 100  # replace 0xAABBCCDD with the correct value
+
+offset = 36  # replace 0 with the correct value
+
+Fill the return address field with the address of the shellcode
+
+content[offset:offset + 4] = (ret).to_bytes(4,byteorder='little')
+
+#########################################################################
+```
 
 使用c语言生shellcode，填充代码为，这里要注意小端对齐：
 
-![image-20211010171959118](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211010171959118.png)
+```c
+/* You need to fill the buffer with appropriate contents here */ 
+int len = strlen(shellcode);
+	for (int i = 0; i < len; i++){
+    	buffer[517 - len + i] = shellcode[i];
+	}
+int ret = 0xbfffeb38 + 100;
+buffer[36] = ret;
+buffer[37] = ret >> 8;
+buffer[38] = ret >> 16;
+buffer[39] = ret >> 24;
+```
 
 运行结果为：
 
-![image-20211010171643168](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211010171643168.png)
+![image-20211011130951613](D:\git_repository\computer_security\学习笔记\4 Buffer_Overflow.assets\image-20211011130951613.png)
 
 ### Task 3: Defeating dash’s Countermeasure
 
@@ -191,19 +214,19 @@
 
 注释掉setuid(0)且shell为zsh时可以进入root shell，此时有效用户是root，真实用户是seed
 
-![image-20211010173013640](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211010173013640.png)
+![image-20211011131002465](D:\git_repository\computer_security\学习笔记\4 Buffer_Overflow.assets\image-20211011131002465.png)
 
 注释掉setuid(0)，但修改为dash时只能进入普通的shell
 
-![image-20211010173243298](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211010173243298.png)
+![image-20211011131013555](D:\git_repository\computer_security\学习笔记\4 Buffer_Overflow.assets\image-20211011131013555.png)
 
 取消注释setuid(0)，此时进入root shell，且真实用户id为root
 
-![image-20211010173501278](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211010173501278.png)
+![image-20211011131023964](D:\git_repository\computer_security\学习笔记\4 Buffer_Overflow.assets\image-20211011131023964.png)
 
 在shellcode的开头加上setuid(0)后，即使在shell为dash的情况下，仍旧可以攻击成功
 
-![image-20211010173823715](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211010173823715.png)
+![image-20211011131034973](D:\git_repository\computer_security\学习笔记\4 Buffer_Overflow.assets\image-20211011131034973.png)
 
 ### Task 4: Defeating Address Randomization
 
@@ -235,7 +258,7 @@
 
 修改地址随机化变量为2后，执行以上脚本，在运行了9209次后，成功获得root shell
 
-![image-20211010175058142](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211010175058142.png)
+![image-20211011131047682](D:\git_repository\computer_security\学习笔记\4 Buffer_Overflow.assets\image-20211011131047682.png)
 
 ### 任务5：打开StackGuard保护
 
@@ -247,7 +270,7 @@
 
 关闭地址随机化，关闭不可执行栈，打开StackGuard，重新运行task2，攻击失败，stack smashing detected
 
-![image-20211010180414992](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211010180414992.png)
+![image-20211011131056036](D:\git_repository\computer_security\学习笔记\4 Buffer_Overflow.assets\image-20211011131056036.png)
 
 ### Task 6: Turn on the Non-executable Stack Protection
 
@@ -263,6 +286,6 @@
 >
 > ​		如果你正在使用我们的Ubuntu 12.04/16.04 VM，不可执行堆栈保护是否有效取决于CPU和虚拟机的设置，因为此保护取决于CPU提供的硬件功能。如果您发现不可执行堆栈保护不起作用，请查看链接到实验室网页的文档（“不可执行堆栈上的注释”），并查看文档中的说明是否有助于解决您的问题。如果没有，那么您可能需要自己解决问题。
 
-在关闭地址随机化，关闭StackGuard，开启不可执行堆栈的情况下，攻击失败，Segmentation fault，触发段错误**[question0]**什么是段错误
+在关闭地址随机化，关闭StackGuard，开启不可执行堆栈的情况下，攻击失败，Segmentation fault，触发段错误**[question]**什么是段错误
 
-![image-20211010180902639](C:\Users\13990\AppData\Roaming\Typora\typora-user-images\image-20211010180902639.png)
+![image-20211011131104270](D:\git_repository\computer_security\学习笔记\4 Buffer_Overflow.assets\image-20211011131104270.png)
